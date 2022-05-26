@@ -1,0 +1,13 @@
+@model Kitaplar
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h5 class="display-5">@Model.Ad Detay Bilgileri</h5>
+<p>ISBN: @Model.Isbn</p>
+<p>Ad: @Model.Ad</p>
+<p>Sayfa Sayısı: @Model.SayfaSayisi</p>
+<p>Stok Miktarı: @Model.Stok</p>
+<p>Kitap Türü: @Model.Turler.TurAd</p>
+<p>Yazar: @Model.Yazarlar.AdSoyad</p>
+<p>Yayınevi: @Model.YayinEvleri.Ad</p>

@@ -1,0 +1,39 @@
+﻿@model List<DersAtamaApp.Models.Entity.Student>
+<h5 class="display-4">Assign Lesson</h5>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <td>Id</td>
+                    <td>No</td>
+                    <td>First Name</td>
+                    <td>Last Name</td>
+                    <td>Period</td>
+                    <td>Department</td>
+                    <td>Assigned Lessons</td>
+                    <td>Assign Lesson</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.StudentId</td>
+                        <td>@item.No</td>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td>@item.Period</td>
+                        <td>@item.Department</td>
+                        <td></td>
+                        <td>
+                            <a asp-controller="Home" asp-action="Assign" asp-route-id="@item.StudentId" class="btn btn-sm btn-primary">Assign Lesson</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

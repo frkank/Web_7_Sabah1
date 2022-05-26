@@ -1,0 +1,30 @@
+@model List<EF_Code.Models.Yazarlar>
+@{
+    ViewData["Title"] = "Yazarlar";
+}
+
+<h1 class="display-3">Yazarlar</h1>
+<a class="btn btn-sm btn-success" asp-action="Create">Yeni Yazar</a><br><br>
+<table class="table table-sm table-dark w-50">
+    <thead class="bg-primary">
+        <tr>
+            <th>Yazar Id</th>
+            <th>Yazar Ad</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var yazar in Model)
+        {
+            <tr>
+                <td>@yazar.Id</td>
+                <td>@yazar.AdSoyad</td>
+                <td>
+                    <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@yazar.Id">Detaylar</a>
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@yazar.Id">Düzenle</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@yazar.Id">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

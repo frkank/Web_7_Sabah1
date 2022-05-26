@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        .menu {
+            position: relative;
+            display: inline-block;
+        }
+        .alt-menu {
+            display: none;
+            position: absolute;
+            min-width: 400px;
+        }
+        #ustume_gel:checked ~ .alt-menu {
+            display: block;
+        }
+        #ustume_gel{display:none;}
+    </style>
+    <title>Menü Mevzuu</title>
+</head>
+
+<body>
+    <div class="menu">
+        <input type="checkbox" id="ustume_gel">
+        <label for="ustume_gel">+</label>
+        <div class="alt-menu">
+            <a href="#">Link 1</a>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+        </div>
+    </div>
+</body>
+
+</html>

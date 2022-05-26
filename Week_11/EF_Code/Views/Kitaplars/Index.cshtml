@@ -1,0 +1,28 @@
+@model List<Kitaplar>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h5 class="display-5">Kitap Listesi</h5>
+<hr>
+<a asp-action="Create" class="btn btn-sm btn-success">Yeni Kitap Oluştur</a>
+<hr>
+<table>
+    <tr>
+        <td>Isbn</td>
+        <td>Kitap Adı</td>
+        <td>İşlem</td>
+    </tr>
+    @foreach (var item in Model)
+    {
+       <tr>
+           <td>@item.Isbn</td>
+           <td>@item.Ad</td>
+           <td>
+               <a asp-action="Details" asp-route-id="@item.Isbn">Detay</a>
+               <a asp-action="Edit" asp-route-id="@item.Isbn">Düzenle</a>
+               <a asp-action="Delete" asp-route-id="@item.Isbn">Sil</a>
+           </td>
+       </tr> 
+    }  
+</table>

@@ -1,0 +1,34 @@
+*{
+    margin:0;
+    padding:0 !important;
+    box-sizing: border-box !important;
+}
+body{
+    background-color: #f6f5f2;
+}
+
+.container{
+    background-color: #ffffff;
+}
+nav .container-fluid{
+    padding:0px !important;
+    border:1px solid #e3e3e3 !important;
+}
+div ul li a{
+    border-right:1px solid #e3e3e3 !important;
+    padding: 15px 15px !important;
+    margin: 0px!important;
+    font-weight: bold;
+}
+div ul li a:hover{
+    background-color: black;
+    color:white !important;
+}
+
+.top-banner{
+    width: 100%;
+    border:1px solid #e3e3e3;
+    border-top: none;
+    border-bottom: none;
+    margin:0px !important;
+}

@@ -1,0 +1,14 @@
+﻿@model List<Sales.Models.Entities.Product>
+    <table>
+        <tr>
+            <td>ID</td>
+            <td>Name</td>
+        </tr>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.ProductId</td>
+                <td>@product.ProductName</td>
+            </tr>
+        }
+    </table>
