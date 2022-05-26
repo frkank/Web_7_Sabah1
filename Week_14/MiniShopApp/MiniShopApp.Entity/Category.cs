@@ -14,5 +14,4 @@ namespace MiniShopApp.Entity
         public string Url { get; set; }
         public List<ProductCategory> ProductCategories { get; set; }
     }
-
 }

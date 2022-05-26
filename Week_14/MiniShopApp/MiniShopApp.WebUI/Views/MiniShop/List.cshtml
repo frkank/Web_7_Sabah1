@@ -1,15 +1,24 @@
 ﻿@model ProductListViewModel
+
 <div class="row">
     <div class="col-md-3">
         @await Component.InvokeAsync("Categories")
     </div>
     <div class="col-md-9">
         <div class="row">
-            @foreach (var product in Model.Products)
+            @if (Model.Products.Count == 0)
             {
-                <div class="col-md-4">
-                    <partial name="_Product" model="product" />
-                </div>
+                <partial name="_NoProduct" />
+            }
+            else
+            {
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col-md-4">
+                        <partial name="_Product" model="product" />
+                        @*@await Html.PartialAsync("_Product", product)*@
+                    </div>
+                }
             }
         </div>
         <div class="row">
@@ -20,20 +29,17 @@
                         {
                             @if (string.IsNullOrEmpty(Model.PageInfo.CurrentCategory))
                             {
-                                <li class="page-item @(Model.PageInfo.CurrentPage==i+1?"active":"")">
+                                <li class="page-item @(Model.PageInfo.CurrentPage==i+1 ? "active" : "")">
                                     <a href="/products?page=@(i+1)" class="page-link">@(i+1)</a>
                                 </li>
                             }
                             else
                             {
-                                <li class="page-item @(Model.PageInfo.CurrentPage==i+1?"active":"")">
+                                <li class="page-item @(Model.PageInfo.CurrentPage==i+1 ? "active" : "")">
                                     <a href="/products/@Model.PageInfo.CurrentCategory?page=@(i+1)" class="page-link">@(i+1)</a>
                                 </li>
                             }
-
                         }
-
-
 
 
 
@@ -42,5 +48,4 @@
             </div>
         </div>
     </div>
-
 </div>

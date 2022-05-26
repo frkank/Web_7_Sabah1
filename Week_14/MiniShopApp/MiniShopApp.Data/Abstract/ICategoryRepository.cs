@@ -9,8 +9,6 @@ namespace MiniShopApp.Data.Abstract
 {
     public interface ICategoryRepository : IRepository<Category>
     {
-        //Burada IRepository içindeki tüm memberlar var.
-        //Ayrıca buraya Category entitysini ilgilendiren memberları yazabiliriz
-        Category GetByIdWithProducts(int id);
+        Category GetByIdWithCategories(int categoryId);
     }
 }

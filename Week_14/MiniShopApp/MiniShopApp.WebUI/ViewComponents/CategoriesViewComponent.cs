@@ -14,7 +14,6 @@ namespace MiniShopApp.WebUI.ViewComponents
         {
             _categoryService = categoryService;
         }
-
         public IViewComponentResult Invoke()
         {
             if (RouteData.Values["category"]!=null)

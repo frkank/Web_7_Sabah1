@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +10,7 @@ using MiniShopApp.Business.Abstract;
 using MiniShopApp.Business.Concrete;
 using MiniShopApp.Data.Abstract;
 using MiniShopApp.Data.Concrete.EfCore;
+using MiniShopApp.WebUI.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,14 +30,14 @@ namespace MiniShopApp.WebUI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Uygulamanýn herhangi bir yerinde IProductRepository kullanarak bir nesne
-            //oluþturduðumda, sen bunu EfCoreProductRepository türünden oluþtur.
+            services.AddDbContext<ApplicationContext>(options => options.UseSqlite("Data Source=MiniShopAppDb"));
+            services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
             services.AddScoped<IProductRepository, EfCoreProductRepository>();
             services.AddScoped<ICategoryRepository, EfCoreCategoryRepository>();
-
-            services.AddScoped<ICategoryService, CategoryManager>();
             services.AddScoped<IProductService, ProductManager>();
-
+            //Proje boyunca ICategoryService çaðrýldýðýnda, CategoryManager'i kullan.
+            services.AddScoped<ICategoryService, CategoryManager>();
+            //Projemizin MVC yapýsýnda olmasýný saðlar.
             services.AddControllersWithViews();
         }
 
@@ -65,35 +68,34 @@ namespace MiniShopApp.WebUI
                 endpoints.MapControllerRoute(
                     name: "adminproductcreate",
                     pattern: "admin/products/create",
-                    defaults: new {controller="Admin", action="ProductCreate"}
+                    defaults: new { controller = "Admin", action = "ProductCreate" }
                     );
-
                 endpoints.MapControllerRoute(
                     name: "adminproducts",
-                    pattern:"admin/products",
-                    defaults: new {controller="Admin", action="ProductList"}
-                    );
-                endpoints.MapControllerRoute(
-                    name: "adminproductedit",
-                    pattern: "admin/products/{id?}",
-                    defaults: new { controller = "Admin", action = "ProductEdit" }
+                    pattern: "admin/products",
+                    defaults: new { controller = "Admin", action = "ProductList" }
                     );
                 endpoints.MapControllerRoute(
                     name: "search",
                     pattern: "search",
                     defaults: new { controller = "MiniShop", action = "Search" }
                     );
-
                 endpoints.MapControllerRoute(
-                    name: "products",
-                    pattern: "products/{category?}",
-                    defaults: new { controller = "MiniShop", action = "List" }
+                   name: "products",
+                   pattern: "products/{category?}",
+                   defaults: new { controller = "MiniShop", action = "List" }
+                   );
+                endpoints.MapControllerRoute(
+                    name: "adminproductedit",
+                    pattern: "admin/products/{id?}",
+                    defaults: new { controller = "Admin", action = "ProductEdit" }
                     );
                 endpoints.MapControllerRoute(
                     name: "productdetails",
                     pattern: "{url}",
                     defaults: new { controller = "MiniShop", action = "Details" }
                     );
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
