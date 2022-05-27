@@ -34,6 +34,26 @@ namespace MiniShopApp.WebUI
 
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;//password'de sayýlarýn zorunlu olmasý saðlandý
+                options.Password.RequireLowercase = true;//küçük harf olmasý saðlandý
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;//özel karakterin olmamasýný saðladýk
+                options.Password.RequiredLength = 6;
+
+                //Lockout
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);//bu iki satýrla 3 kere hatalý giriþten sonra 5 dk bekletme saðlandý.
+
+                //user
+                options.User.RequireUniqueEmail = true;
+
+                //SignIn
+                options.SignIn.RequireConfirmedAccount = true;
+                
+
+            });
 
             services.AddScoped<IProductRepository, EfCoreProductRepository>();
             services.AddScoped<ICategoryRepository, EfCoreCategoryRepository>();
