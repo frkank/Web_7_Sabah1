@@ -14,6 +14,7 @@ namespace MiniShopApp.WebUI.EmailServices
 
         public SmtpEmailSender(string host, int port, bool enableSSL, string userName, string password)
         {
+            //Depenency Injection
             _host = host;
             _port = port;
             _enableSSL = enableSSL;

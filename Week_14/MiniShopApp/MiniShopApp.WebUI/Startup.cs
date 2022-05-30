@@ -10,6 +10,7 @@ using MiniShopApp.Business.Abstract;
 using MiniShopApp.Business.Concrete;
 using MiniShopApp.Data.Abstract;
 using MiniShopApp.Data.Concrete.EfCore;
+using MiniShopApp.WebUI.EmailServices;
 using MiniShopApp.WebUI.Identity;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,17 @@ namespace MiniShopApp.WebUI
             services.AddScoped<IProductService, ProductManager>();
             //Proje boyunca ICategoryService çaðrýldýðýnda, CategoryManager'i kullan.
             services.AddScoped<ICategoryService, CategoryManager>();
+            services.AddScoped<IEmailSender, SmtpEmailSender>(i => new SmtpEmailSender(
+                Configuration["EmailSender:Host"],
+                Configuration.GetValue<int>("EmailSender:Port"),
+                Configuration.GetValue<bool>("EmailSender:EnableSSL"),
+                Configuration["EmailSender:UserName"],
+                Configuration["EmailSender:Password"]
+                ));
+
+
+
+
             //Projemizin MVC yapýsýnda olmasýný saðlar.
             services.AddControllersWithViews();
             services.AddRazorPages().AddViewOptions(options =>
@@ -85,6 +97,7 @@ namespace MiniShopApp.WebUI
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseAuthentication();
             app.UseRouting();
 
             app.UseAuthorization();

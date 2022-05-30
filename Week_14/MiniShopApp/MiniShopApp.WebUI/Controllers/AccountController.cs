@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MiniShopApp.WebUI.EmailServices;
 using MiniShopApp.WebUI.Identity;
 using MiniShopApp.WebUI.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +15,13 @@ namespace MiniShopApp.WebUI.Controllers
     {
         private UserManager<User> _userManager;
         private SignInManager<User> _signInManager;
+        private IEmailSender _emailSender;
         
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
         public IActionResult Index()
         {
@@ -62,11 +66,46 @@ namespace MiniShopApp.WebUI.Controllers
                     userId = user.Id,
                     token = code
                 });
-               
+                //email gönderme işlemi
+                await _emailSender.SendEmailAsync(model.Email, "MiniShopApp Confirm Account!", $"Lütfen email adresinizi onaylamak için <a href='https://localhost:5001{url}'>tıklayınız!</a>");
+                CreateMessage("Kayıt işlemini tamamlamak için mailinize gönderilen onaylama linkine tıklayınız!", "warning");
+                return RedirectToAction("Login", "Account");
             }
 
 
             return View();
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                CreateMessage("Bir sorun oluştu", "warning");
+                return View();    
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user!=null)
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                if (result.Succeeded)
+                {
+                    CreateMessage("Hesabınız onaylanmıştır!", "Success");
+                }
+                return View();
+            }
+            CreateMessage("Hesabınız onaylanamamıştır! Lütfen daha sonra yeniden deneyiniz.", "danger");
+            return View();
+        }
+
+
+        private void CreateMessage(string message, string alertType)
+        {
+            var msg = new AlertMessage()
+            {
+                Message = message,
+                AlertType = alertType
+            };
+            TempData["Message"] = JsonConvert.SerializeObject(msg);
         }
     }
 }
