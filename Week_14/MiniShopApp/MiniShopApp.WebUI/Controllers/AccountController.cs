@@ -31,7 +31,7 @@ namespace MiniShopApp.WebUI.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
-            //dolduralacak
+            //Daha sonra burayı dolduracağız.
             return View();
         }
         public IActionResult Register()
@@ -47,15 +47,14 @@ namespace MiniShopApp.WebUI.Controllers
             }
             var user = new User()
             {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                UserName = model.UserName,
-                Email = model.Email
+                FirstName=model.FirstName,
+                LastName=model.LastName,
+                UserName=model.UserName,
+                Email=model.Email
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)//başarılı bir şekilde create gerçeklestiyse
+            if (result.Succeeded)//Başarılı bir şekilde create gerçekleştiyse
             {
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var url = Url.Action("ConfirmEmail", "Account", new
@@ -63,8 +62,9 @@ namespace MiniShopApp.WebUI.Controllers
                     userId = user.Id,
                     token = code
                 });
-                //await 
+               
             }
+
 
             return View();
         }

@@ -36,21 +36,22 @@ namespace MiniShopApp.WebUI
 
             services.Configure<IdentityOptions>(options =>
             {
-                options.Password.RequireDigit = true;//password'de sayýlarýn zorunlu olmasý saðlandý
-                options.Password.RequireLowercase = true;//küçük harf olmasý saðlandý
+                //Password
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;//özel karakterin olmamasýný saðladýk
+                options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 6;
 
                 //Lockout
                 options.Lockout.MaxFailedAccessAttempts = 3;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);//bu iki satýrla 3 kere hatalý giriþten sonra 5 dk bekletme saðlandý.
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
-                //user
+                //User
                 options.User.RequireUniqueEmail = true;
 
                 //SignIn
-                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 
 
             });
@@ -62,6 +63,9 @@ namespace MiniShopApp.WebUI
             services.AddScoped<ICategoryService, CategoryManager>();
             //Projemizin MVC yapýsýnda olmasýný saðlar.
             services.AddControllersWithViews();
+            services.AddRazorPages().AddViewOptions(options =>
+                options.HtmlHelperOptions.ClientValidationEnabled = false
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

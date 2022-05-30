@@ -82,40 +82,71 @@ namespace MiniShopApp.WebUI.Controllers
         }
         public IActionResult ProductEdit(int? id)
         {
-            var entity = _productService.GetByIdWithCategories((int)id);
-            var model = new ProductModel()
-            {
-                ProductId = entity.ProductId,
-                Name = entity.Name,
-                Url = entity.Url,
-                Price = entity.Price,
-                Description = entity.Description,
-                ImageUrl = entity.ImageUrl,
-                IsApproved = entity.IsApproved,
-                IsHome = entity.IsHome,
-                SelectedCategories = entity
-                    .ProductCategories
-                    .Select(i => i.Category)
-                    .ToList()
-            };
-            ViewBag.Categories = _categoryService.GetAll();
-            return View(model);
+
+                var entity = _productService.GetByIdWithCategories((int)id);
+                var model = new ProductModel()
+                {
+                    ProductId = entity.ProductId,
+                    Name = entity.Name,
+                    Url = entity.Url,
+                    Price = entity.Price,
+                    Description = entity.Description,
+                    ImageUrl = entity.ImageUrl,
+                    IsApproved = entity.IsApproved,
+                    IsHome = entity.IsHome,
+                    SelectedCategories = entity
+                        .ProductCategories
+                        .Select(i => i.Category)
+                        .ToList()
+                };
+                ViewBag.Categories = _categoryService.GetAll();
+                return View(model);
+            
         }
         [HttpPost]
-        public IActionResult ProductEdit(ProductModel model, int[] categoryIds)
+        public IActionResult ProductEdit(ProductModel model, int[] categoryIds, IFormFile file)
         {
             //Aslında üçüncü bir parametremiz de olacak. (Create'te de olacak)
             //IFormFile tipinde resim.
-            var entity = _productService.GetById(model.ProductId);
-            entity.Name = model.Name;
-            entity.Price = model.Price;
-            entity.Url = model.Url;
-            entity.Description = model.Description;
-            entity.IsApproved = model.IsApproved;
-            entity.IsHome = model.IsHome;
-            entity.ImageUrl = model.ImageUrl;
-            _productService.Update(entity, categoryIds);
-            return RedirectToAction("ProductList");
+            if (ModelState.IsValid && categoryIds.Length > 0 && file != null)
+            {
+                var url = JobManager.MakeUrl(model.Name);
+                model.ImageUrl = JobManager.UploadImage(file, url);
+                var entity = _productService.GetById(model.ProductId);
+                if (entity==null)
+                {
+                    return NotFound();
+                }
+
+                entity.Name = model.Name;
+                entity.Price = (decimal)model.Price;
+                entity.Url = model.Url;
+                entity.Description = model.Description;
+                entity.IsApproved = model.IsApproved;
+                entity.IsHome = model.IsHome;
+                entity.ImageUrl = model.ImageUrl;
+                _productService.Update(entity, categoryIds);
+                CreateMessage("Ürün başarıyla güncellenmiştir.", "success");
+                return RedirectToAction("ProductList");
+            }
+            if (categoryIds.Length > 0)
+            {
+                model.SelectedCategories = categoryIds.Select(catId => new Category()
+                {
+                    CategoryId = catId
+                }).ToList();
+            }
+            else
+            {
+                ViewBag.CategoryMessage = "Lütfen en az bir kategori seçiniz!";
+            }
+
+            if (file == null)
+            {
+                ViewBag.ImageMessage = "Lütfen bir resim seçiniz!";
+            }
+            ViewBag.Categories = _categoryService.GetAll();
+            return View(model);
         }
 
         public IActionResult ProductDelete(int productId)
