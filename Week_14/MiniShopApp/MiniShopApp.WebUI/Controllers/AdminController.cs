@@ -27,6 +27,7 @@ namespace MiniShopApp.WebUI.Controllers
         {
             return View();
         }
+        
         public IActionResult ProductList()
         {
             return View(_productService.GetAll());
