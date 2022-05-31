@@ -16,7 +16,7 @@ namespace MiniShopApp.WebUI.Controllers
         private UserManager<User> _userManager;
         private SignInManager<User> _signInManager;
         private IEmailSender _emailSender;
-        
+
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -39,26 +39,27 @@ namespace MiniShopApp.WebUI.Controllers
             {
                 return View(model);
             }
+
             var user = await _userManager.FindByNameAsync(model.UserName);
-            if (user==null)
+            if (user == null)
             {
-                ModelState.AddModelError("", "Böyle bir kullanıcı bulunamadı.");
+                ModelState.AddModelError("", "Böyle bir kullanıcı bulunamadı!");
                 return View(model);
             }
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
-                ModelState.AddModelError("", "Hesabınız onaylanmamış, lütfen mail adresinizegelen onay linkine tıklayarak hesabınızı onaylayınız.");
+                ModelState.AddModelError("", "Hesabınız onaylanmamış!Lütfen mail adresinize gelen onay linkini tıklayarak, hesabınızı onaylanıyız!");
                 return View(model);
             }
 
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, true);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index","Home");
+                return RedirectToAction("Index", "Home");
             }
 
-            CreateMessage("Şifreniz hatalı", "danger");
+            CreateMessage("Şifreniz hatalı!", "danger");
             return View(model);
         }
         public IActionResult Register()
@@ -74,10 +75,10 @@ namespace MiniShopApp.WebUI.Controllers
             }
             var user = new User()
             {
-                FirstName=model.FirstName,
-                LastName=model.LastName,
-                UserName=model.UserName,
-                Email=model.Email
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                UserName = model.UserName,
+                Email = model.Email
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -91,7 +92,7 @@ namespace MiniShopApp.WebUI.Controllers
                 });
                 //email gönderme işlemi
                 await _emailSender.SendEmailAsync(model.Email, "MiniShopApp Confirm Account!", $"Lütfen email adresinizi onaylamak için <a href='https://localhost:5001{url}'>tıklayınız!</a>");
-                CreateMessage("Kayıt işlemini tamamlamak için mailinize gönderilen onaylama linkine tıklayınız!", "warning");
+                CreateMessage("Kayıt işleminizi tamamlamak için mailinize gönderilen onaylama linkine tıklayınız!", "warning");
                 return RedirectToAction("Login", "Account");
             }
 
@@ -103,23 +104,35 @@ namespace MiniShopApp.WebUI.Controllers
         {
             if (userId == null || token == null)
             {
-                CreateMessage("Bir sorun oluştu", "warning");
-                return View();    
+                CreateMessage("Bir sorun oluştur", "warning");
+                return View();
             }
+
             var user = await _userManager.FindByIdAsync(userId);
-            if (user!=null)
+            if (user != null)
             {
                 var result = await _userManager.ConfirmEmailAsync(user, token);
                 if (result.Succeeded)
                 {
-                    CreateMessage("Hesabınız onaylanmıştır!", "Success");
+                    CreateMessage("Hesabınız onaylanmıştır!", "success");
                 }
                 return View();
             }
-            CreateMessage("Hesabınız onaylanamamıştır! Lütfen daha sonra yeniden deneyiniz.", "danger");
+
+            CreateMessage("Hesabınız onaylanamamıştır! Lütfen daha sonra yeniden deneyiniz", "danger");
             return View();
         }
 
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect("~/");
+        }
+
+        public IActionResult ForgotPassword()
+        {
+
+        }
 
         private void CreateMessage(string message, string alertType)
         {
