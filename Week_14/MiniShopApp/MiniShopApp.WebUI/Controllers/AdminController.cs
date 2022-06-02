@@ -32,6 +32,10 @@ namespace MiniShopApp.WebUI.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
         }
+        public IActionResult UserList()
+        {
+            return View(_userManager.Users);
+        }
         public IActionResult RoleList()
         {
             return View(_roleManager.Roles);
@@ -114,10 +118,6 @@ namespace MiniShopApp.WebUI.Controllers
                 }
             }
             return Redirect("/admin/role" + model.RoleId);
-        }
-        public IActionResult UserList()
-        {
-            return View();
         }
         public IActionResult Index()
         {
