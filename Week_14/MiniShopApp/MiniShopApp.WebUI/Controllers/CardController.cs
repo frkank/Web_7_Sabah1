@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MiniShopApp.Business.Abstract;
+using MiniShopApp.Core;
+using MiniShopApp.Entity;
 using MiniShopApp.WebUI.Identity;
 using MiniShopApp.WebUI.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OrderItem = MiniShopApp.Entity.OrderItem;
 
 namespace MiniShopApp.WebUI.Controllers
 {
@@ -19,11 +23,13 @@ namespace MiniShopApp.WebUI.Controllers
     {
         private ICardService _cardService;
         private UserManager<User> _userManager;
+        private IOrderService _orderService;
 
-        public CardController(ICardService cardService, UserManager<User> userManager)
+        public CardController(ICardService cardService, UserManager<User> userManager, IOrderService orderService)
         {
             _cardService = cardService;
             _userManager = userManager;
+            _orderService = orderService;
         }
 
         public IActionResult Index()
@@ -104,12 +110,47 @@ namespace MiniShopApp.WebUI.Controllers
                 var payment = PaymentProcess(orderModel);
                 if (payment.Status=="success")
                 {
-                    //SaveOrder();
+                    SaveOrder(orderModel,payment,userId);
                     //ClearCard()
-                    return View();
+                    return View("Success");
+                }
+                else
+                {
+                    TempData["Message"] = JobManager.CreateMessage("",payment.ErrorMessage,"danger");
                 }
             }
-            
+            return View(orderModel);
+        }
+
+        private void SaveOrder(OrderModel orderModel, Payment payment, string userId)
+        {
+            var order = new Order();
+            order.OrderNumber = new Random().Next(111111111, 999999999).ToString();
+            order.OrderState = EnumOrderState.Completed;
+            order.PaymentType = EnumPaymentType.CreditCard;
+            order.PaymentId = payment.PaymentId;
+            order.ConversationId = payment.ConversationId;
+            order.OrderDate = new DateTime();
+            order.FirstName = orderModel.FirstName;
+            order.LastName = orderModel.LastName;
+            order.UserId = userId;
+            order.Address = orderModel.Address;
+            order.City = orderModel.City;
+            order.Phone = orderModel.Phone;
+            order.Email = orderModel.Email;
+            order.OrderItems = new List<OrderItem>();
+            foreach (var item in orderModel.CardModel.CardItems)
+            {
+                var orderItem = new OrderItem()
+                {
+                    Price=item.Price,
+                    Quantity=item.Quantity,
+                    ProductId=item.ProductId,
+                };
+                order.OrderItems.Add(orderItem);
+            }
+            //Bu bilgileri kullanarak order kaydı yapabiliriz.
+            _orderService.Create(order);
         }
 
         private Payment PaymentProcess(OrderModel orderModel)
@@ -133,8 +174,8 @@ namespace MiniShopApp.WebUI.Controllers
             PaymentCard paymentCard = new PaymentCard();
             paymentCard.CardHolderName = orderModel.CardName;
             paymentCard.CardNumber = orderModel.CardNumber;
-            paymentCard.ExpireMonth = orderModel.ExprationMonth;
-            paymentCard.ExpireYear = orderModel.ExprationYear;
+            paymentCard.ExpireMonth = orderModel.ExpirationMonth;
+            paymentCard.ExpireYear = orderModel.ExpirationYear;
             paymentCard.Cvc = orderModel.Cvc;
             paymentCard.RegisterCard = 0;
             request.PaymentCard = paymentCard;
@@ -186,12 +227,13 @@ namespace MiniShopApp.WebUI.Controllers
                 basketItem.Name = item.Name;
                 basketItem.Category1 = "General";
                 basketItem.ItemType = BasketItemType.PHYSICAL.ToString();
-                basketItem.Price = item.Price.ToString();
+                basketItem.Price = (item.Quantity*item.Price).ToString();
                 basketItems.Add(basketItem);
             }
             request.BasketItems = basketItems;
             return Payment.Create(request, options);
             
         }
+        
     }
 }

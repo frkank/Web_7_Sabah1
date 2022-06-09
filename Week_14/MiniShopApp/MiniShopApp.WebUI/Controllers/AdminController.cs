@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MiniShopApp.Business.Abstract;
 using MiniShopApp.Business.Concrete;
+using MiniShopApp.Core;
 using MiniShopApp.Entity;
 using MiniShopApp.WebUI.Identity;
 using MiniShopApp.WebUI.Models;
@@ -248,7 +249,7 @@ namespace MiniShopApp.WebUI.Controllers
                 };
                 _productService.Create(product, categoryIds);
 
-                CreateMessage("Ürün eklenmiştir", "success");
+                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Ürün eklenmiştir", "success");
                 return RedirectToAction("ProductList");
             }
             //İşler yolunda gitmediyse
@@ -319,7 +320,7 @@ namespace MiniShopApp.WebUI.Controllers
                 entity.IsHome = model.IsHome;
                 entity.ImageUrl = model.ImageUrl;
                 _productService.Update(entity, categoryIds);
-                CreateMessage("Ürün başarıyla güncellenmiştir.", "success");
+                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Ürün başarıyla güncellenmiştir.", "success");
                 return RedirectToAction("ProductList");
             }
             if (categoryIds.Length > 0)
@@ -349,14 +350,5 @@ namespace MiniShopApp.WebUI.Controllers
             return RedirectToAction("ProductList");
         }
 
-        private void CreateMessage(string message, string alertType)
-        {
-            var msg = new AlertMessage()
-            {
-                Message = message,
-                AlertType = alertType
-            };
-            TempData["Message"] = JsonConvert.SerializeObject(msg);
-        }
     }
 }
