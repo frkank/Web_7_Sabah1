@@ -8,9 +8,10 @@ namespace MiniShopApp.WebUI.Models
 {
     public class LoginModel
     {
-        [Required(ErrorMessage ="Kullanıcı adı boş bırakılamaz.")]
+        [Required(ErrorMessage ="Kullanıcı adı boş bırakılamaz")]
         public string UserName { get; set; }
-        [Required(ErrorMessage ="Şifrenizi giriniz.")]
+
+        [Required(ErrorMessage = "Şifrenizi giriniz!")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
         public string ReturnUrl { get; set; }

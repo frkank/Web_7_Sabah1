@@ -16,7 +16,10 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a href="/card" class="nav-link text-dark">Cards</a>
+                                <a href="/card" class="nav-link text-dark">Card</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/orders" class="nav-link text-dark">Orders</a>
                             </li>
                             if (User.IsInRole("Admin"))
                             {

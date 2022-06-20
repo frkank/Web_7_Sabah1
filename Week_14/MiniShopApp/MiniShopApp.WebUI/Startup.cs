@@ -10,7 +10,6 @@ using Microsoft.Extensions.Hosting;
 using MiniShopApp.Business.Abstract;
 using MiniShopApp.Business.Concrete;
 using MiniShopApp.Data.Abstract;
-using MiniShopApp.Data.Concrete;
 using MiniShopApp.Data.Concrete.EfCore;
 using MiniShopApp.WebUI.EmailServices;
 using MiniShopApp.WebUI.Identity;
@@ -33,7 +32,11 @@ namespace MiniShopApp.WebUI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationContext>(options => options.UseSqlite("Data Source=MiniShopAppDb"));
+            //services.AddDbContext<ApplicationContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
+            //services.AddDbContext<MiniShopContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
+
+            services.AddDbContext<ApplicationContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
+            services.AddDbContext<MiniShopContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
 
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
@@ -49,15 +52,13 @@ namespace MiniShopApp.WebUI
                 //Lockout
                 options.Lockout.MaxFailedAccessAttempts = 3;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-
+                 
                 //User
                 options.User.RequireUniqueEmail = true;
 
                 //SignIn
                 options.SignIn.RequireConfirmedEmail = true;
-                
-
-            });
+            }); 
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -65,7 +66,7 @@ namespace MiniShopApp.WebUI
                 options.LogoutPath = "/account/logout";
                 options.AccessDeniedPath = "/account/accessdenied";
                 options.SlidingExpiration = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//Yazýlan bu iki satýrla, kullanýcý 20 dk içerisinde bir istek yapmazsa logout yapýlacak. Her yaptýðý istek sonucunda bu süre yenilenecektir.
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                 options.Cookie = new CookieBuilder()
                 {
                     HttpOnly = true,
@@ -73,27 +74,26 @@ namespace MiniShopApp.WebUI
                     SameSite = SameSiteMode.Strict
                 };
             });
-            services.AddScoped<IProductRepository, EfCoreProductRepository>();
-            services.AddScoped<ICategoryRepository, EfCoreCategoryRepository>();
-            services.AddScoped<ICardRepository,EfCoreCardRepository>();
-            services.AddScoped<IOrderRepository,EfCoreOrderRepository>();
+            //services.AddScoped<IProductRepository, EfCoreProductRepository>();
+            //services.AddScoped<ICategoryRepository, EfCoreCategoryRepository>();
+            //services.AddScoped<ICardRepository, EfCoreCardRepository>();
+            //services.AddScoped<IOrderRepository, EfCoreOrderRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IProductService, ProductManager>();
-            //Proje boyunca ICategoryService çaðrýldýðýnda, CategoryManager'i kullan.
             services.AddScoped<ICategoryService, CategoryManager>();
             services.AddScoped<ICardService, CardManager>();
             services.AddScoped<IOrderService, OrderManager>();
 
 
 
-
-            services.AddScoped<IEmailSender, SmtpEmailSender>(i => new SmtpEmailSender(
+            services.AddScoped<IEmailSender, SmtpEmailSender>(i=>new SmtpEmailSender(
                 Configuration["EmailSender:Host"],
                 Configuration.GetValue<int>("EmailSender:Port"),
                 Configuration.GetValue<bool>("EmailSender:EnableSSL"),
                 Configuration["EmailSender:UserName"],
                 Configuration["EmailSender:Password"]
                 ));
-
 
 
 
@@ -105,11 +105,10 @@ namespace MiniShopApp.WebUI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ICardService cardService)
         {
             if (env.IsDevelopment())
             {
-                SeedDatabase.Seed();
                 app.UseDeveloperExceptionPage();
             }
             else
@@ -128,6 +127,12 @@ namespace MiniShopApp.WebUI
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "orders",
+                    pattern: "orders",
+                    defaults: new { controller = "Card", action = "GetOrders" }
+                    );
+
                 endpoints.MapControllerRoute(
                     name: "checkout",
                     pattern: "checkout",
@@ -153,7 +158,7 @@ namespace MiniShopApp.WebUI
                     );
 
                 endpoints.MapControllerRoute(
-                    name: "useredit",
+                    name: "adminuseredit",
                     pattern: "admin/user/{id}",
                     defaults: new { controller = "Admin", action = "UserEdit" }
                     );
@@ -175,6 +180,7 @@ namespace MiniShopApp.WebUI
                     pattern: "admin/role/{id}",
                     defaults: new { controller = "Admin", action = "RoleEdit" }
                     );
+
 
                 endpoints.MapControllerRoute(
                     name: "adminproductcreate",
@@ -212,9 +218,8 @@ namespace MiniShopApp.WebUI
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            //Buraya kullanýcý bilgilerini oluþturacak metodumuzu çaðýran kodu yazacaðýz.
-            SeedIdentity.Seed(userManager, roleManager, Configuration).Wait();
-
+            //Buraya kullanýcý bilgilerini oluþturacak metodumuz çaðýran kodu yazacaðýz.
+            SeedIdentity.Seed(userManager, roleManager, cardService, Configuration).Wait();
         }
     }
 }

@@ -32,16 +32,16 @@ namespace MiniShopApp.WebUI.Controllers
         {
             return View();
         }
+        
         public IActionResult Index()
         {
             return View();
         }
-        public IActionResult Login(string returnUrl)
+        public IActionResult Login( string returnUrl)
         {
-
-            return View(new LoginModel() 
-            { 
-                ReturnUrl=returnUrl
+            return View(new LoginModel()
+            {
+                ReturnUrl=returnUrl   
             });
         }
         [HttpPost]
@@ -64,15 +64,16 @@ namespace MiniShopApp.WebUI.Controllers
                 ModelState.AddModelError("", "Hesabınız onaylanmamış!Lütfen mail adresinize gelen onay linkini tıklayarak, hesabınızı onaylanıyız!");
                 return View(model);
             }
-
+             
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, true);
             if (result.Succeeded)
             {
                 return Redirect(model.ReturnUrl ?? "~/");
             }
 
-            TempData["Message"] = JobManager.CreateMessage("DİKKAT","Şifreniz hatalı!", "danger");
+            TempData["Message"]=JobManager.CreateMessage("DİKKAT","Şifreniz hatalı!", "danger");
             return View(model);
+            
         }
         public IActionResult Register()
         {
@@ -104,7 +105,7 @@ namespace MiniShopApp.WebUI.Controllers
                 });
                 //email gönderme işlemi
                 await _emailSender.SendEmailAsync(model.Email, "MiniShopApp Confirm Account!", $"Lütfen email adresinizi onaylamak için <a href='https://localhost:5001{url}'>tıklayınız!</a>");
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT","Kayıt işleminizi tamamlamak için mailinize gönderilen onaylama linkine tıklayınız!", "warning");
+                TempData["Message"] = JobManager.CreateMessage("","Kayıt işleminizi tamamlamak için mailinize gönderilen onaylama linkine tıklayınız!", "warning");
                 return RedirectToAction("Login", "Account");
             }
 
@@ -116,7 +117,7 @@ namespace MiniShopApp.WebUI.Controllers
         {
             if (userId == null || token == null)
             {
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT","Bir sorun oluştur", "warning");
+                TempData["Message"] = JobManager.CreateMessage("","Bir sorun oluştur", "warning");
                 return View();
             }
 
@@ -126,14 +127,14 @@ namespace MiniShopApp.WebUI.Controllers
                 var result = await _userManager.ConfirmEmailAsync(user, token);
                 if (result.Succeeded)
                 {
-                    //Card Oluşturulacak
+                    //Card oluşturulacak
                     _cardService.InitializeCard(userId);
-                    TempData["Message"] = JobManager.CreateMessage("DİKKAT","Hesabınız onaylanmıştır!", "success");
+                    TempData["Message"] = JobManager.CreateMessage("","Hesabınız onaylanmıştır!", "success");
                 }
                 return View();
             }
 
-            TempData["Message"] = JobManager.CreateMessage("DİKKAT","Hesabınız onaylanamamıştır! Lütfen daha sonra yeniden deneyiniz", "danger");
+            TempData["Message"] = JobManager.CreateMessage("","Hesabınız onaylanamamıştır! Lütfen daha sonra yeniden deneyiniz", "danger");
             return View();
         }
 
@@ -152,14 +153,14 @@ namespace MiniShopApp.WebUI.Controllers
         {
             if (String.IsNullOrEmpty(email))
             {
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Lütfen email adresinizi giriniz.", "Warning");
+                TempData["Message"] = JobManager.CreateMessage("","Lütfen email adresinizi giriniz", "warning");
                 return View();
             }
 
             var user = await _userManager.FindByEmailAsync(email);
-            if (user==null)
+            if (user == null)
             {
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Böyle bir email adresi bulunumadı, lütfen kontrol ediniz!", "Danger");
+                TempData["Message"] = JobManager.CreateMessage("","Böyle bir email adresi bulunmadı! Lütfen kontrol ederek, tekrar deneyiniz!", "danger");
                 return View();
             }
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -171,17 +172,18 @@ namespace MiniShopApp.WebUI.Controllers
 
             await _emailSender.SendEmailAsync(
                 email,
-                "MiniShopApp Reset Password",
-                $"Lütefen parolanızı yenilemek için <a href='https://localhost:5001{url}'>tıklayınız.</a>"
+                "MiniShopApp Şifre Sıfırlama",
+                $"Lütfen parolanızı yenilemek için <a href='https://localhost:5001{url}'>tıklayınız.</a>"
                 );
-            TempData["Message"] = JobManager.CreateMessage("DİKKAT","Şifre sıfırlama linki kayıtlı mail adresinize gönderilmiştir, lütfen kontrol ediniz.", "warning");
+            TempData["Message"] = JobManager.CreateMessage("","Şifre sıfırlama linki kayıtlı mail adresinize gönderilmiştir. Lütfen kontrol ediniz.", "warning");
             return RedirectToAction("Login");
         }
+
         public IActionResult ResetPassword(string userId, string token)
         {
-            if (userId==null || token==null)
+            if (userId == null || token == null)
             {
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Bir sorun oluştu lütfen daha sonra tekrar deneyin.", "danger");
+                TempData["Message"] = JobManager.CreateMessage("","Bir sorun oluştu.Daha sonra yeniden deneyiniz!", "danger");
                 return RedirectToAction("Index", "Home");
             }
             var model = new ResetPasswordModel()
@@ -190,7 +192,7 @@ namespace MiniShopApp.WebUI.Controllers
             };
             return View();
         }
-        [HttpPost]
+        [HttpPost] 
         public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
         {
             if (!ModelState.IsValid)
@@ -198,23 +200,24 @@ namespace MiniShopApp.WebUI.Controllers
                 return View(model);
             }
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user==null)
+            if (user == null)
             {
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "Bir sorun oluştu", "warning");
+                TempData["Message"] = JobManager.CreateMessage("","Bir sorun oluştu, lütfen bilgileri kontrol ederek yeniden deneyiniz!", "danger");
                 return View();
             }
             var result = await _userManager.ResetPasswordAsync(
-                user, 
-                model.Token, 
-                model.Password
+                user, model.Token, model.Password
                 );
             if (result.Succeeded)
             {
                 return RedirectToAction("Login");
             }
-                TempData["Message"] = JobManager.CreateMessage("DİKKAT", "bir sorun oluştu, Lütfen admine başvurunuz", "danger");
-                return Redirect("~/");           
+
+            TempData["Message"] = JobManager.CreateMessage("","Bir sorun oluştu, lütfen admine başvurunuz.", "danger");
+            return Redirect("~/");
+
+
+
         }
-       
-    }
+     }
 }

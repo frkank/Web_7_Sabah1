@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MiniShopApp.Core
 {
-    public static class JobManager
+    public static class JobManager 
     {
         public static string MakeUrl(string url)
         {

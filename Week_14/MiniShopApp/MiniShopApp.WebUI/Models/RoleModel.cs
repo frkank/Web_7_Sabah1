@@ -19,7 +19,7 @@ namespace MiniShopApp.WebUI.Models
         public IEnumerable<User> Members { get; set; }
         public IEnumerable<User> NonMembers { get; set; }
     }
-    public class RoleEditDeatils
+    public class RoleEditDetails
     {
         public string RoleId { get; set; }
         public string RoleName { get; set; }

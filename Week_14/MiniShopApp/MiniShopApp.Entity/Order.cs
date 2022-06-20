@@ -23,14 +23,16 @@ namespace MiniShopApp.Entity
         public List<OrderItem> OrderItems { get; set; }
         public EnumOrderState OrderState { get; set; }
         public EnumPaymentType PaymentType { get; set; }
+
     }
 
     public enum EnumOrderState
     {
         Waiting=0,
-        Unpaint=1,
+        Unpaid=1,
         Completed=2
     }
+
     public enum EnumPaymentType
     {
         CreditCard=0,

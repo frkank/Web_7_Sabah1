@@ -11,17 +11,20 @@ namespace MiniShopApp.Business.Concrete
 {
     public class CardManager : ICardService
     {
-        private ICardRepository _cardRepository;
-        public CardManager(ICardRepository cardRepository)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CardManager(IUnitOfWork unitOfWork)
         {
-            _cardRepository = cardRepository;
+            _unitOfWork = unitOfWork;
         }
+
         public void DeleteFromCard(string userId, int productId)
         {
             var card = GetCardByUserId(userId);
             if (card!=null)
             {
-                _cardRepository.DeleteFromCard(card.Id,productId);
+                _unitOfWork.Cards.DeleteFromCard(card.Id,productId);
+                
             }
         }
         public void AddToCard(string userId, int productId, int quantity)
@@ -30,7 +33,7 @@ namespace MiniShopApp.Business.Concrete
             if (card!=null)
             {
                 var index = card.CardItems.FindIndex(i => i.ProductId == productId);
-                if (index<0)//Eğer ürün daha önce card'da yoksa.
+                if (index<0)//eğer ürün daha card'da yoksa
                 {
                     card.CardItems.Add(new CardItem()
                     {
@@ -43,18 +46,25 @@ namespace MiniShopApp.Business.Concrete
                 {
                     card.CardItems[index].Quantity += quantity;
                 }
-                _cardRepository.Update(card);
+                _unitOfWork.Cards.Update(card);
+                _unitOfWork.Save();
             }
         }
 
         public Card GetCardByUserId(string userId)
         {
-            return _cardRepository.GetByUserId(userId);
+            return _unitOfWork.Cards.GetByUserId(userId);
         }
 
         public void InitializeCard(string userId)
         {
-            _cardRepository.Create(new Card() { UserId = userId});
+            _unitOfWork.Cards.Create(new Card() { UserId=userId});
+            _unitOfWork.Save();
+        }
+
+        public void ClearCard(int cardId)
+        {
+            _unitOfWork.Cards.ClearCard(cardId);
         }
     }
 }

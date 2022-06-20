@@ -21,6 +21,7 @@ namespace MiniShopApp.WebUI.EmailServices
             _userName = userName;
             _password = password;
         }
+
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var client = new SmtpClient(this._host, this._port)
